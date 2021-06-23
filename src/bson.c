@@ -276,14 +276,8 @@ static void toBSONType(lua_State *L, bson_type_t type, int idx, bson_value_t *va
 }
 
 static lua_Integer getArrayLength(lua_State *L, int idx) {
-	lua_Integer len = -1;
-	lua_getfield(L, idx, "__array");
-	if (lua_toboolean(L, -1)) {
-		if (!isInteger(L, -1, &len)) len = lua_rawlen(L, idx);
-		if (len < 0) len = 0;
-	}
-	lua_pop(L, 1);
-	return len;
+	lua_Integer len = (lua_Integer)lua_rawlen(L, idx);
+    return len == 0 ? -1 : len;  /* treat 0 as map */
 }
 
 static bool appendTable(lua_State *L, int idx, int ridx, int *nerr, bson_t *bson, lua_Integer len);
@@ -511,10 +505,6 @@ static void unpackTable(lua_State *L, bson_iter_t *iter, int hidx, bool array) {
 		else lua_pushlstring(L, bson_iter_key(iter), bson_iter_key_len(iter));
 		unpackValue(L, iter, hidx);
 		lua_rawset(L, -3);
-	}
-	if (array) {
-		lua_pushinteger(L, len);
-		lua_setfield(L, -2, "__array");
 	}
 	if (lua_isnil(L, hidx)) return; /* No handler */
 	lua_pushvalue(L, hidx);
