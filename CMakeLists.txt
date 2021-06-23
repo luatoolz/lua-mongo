@@ -1,58 +1,27 @@
-cmake_minimum_required(VERSION 3.0)
-project(lua-mongo)
+# lua-mongo: mongo for lua, forked from neoxic
+# Jian Chen <admin@chensoft.com>
+# http://chensoft.com
+cmake_minimum_required(VERSION 3.1)
+project(mongo LANGUAGES C)
 
-set(USE_LUA_VERSION "" CACHE STRING "Build for Lua version 'X.Y' ('jit' for LuaJIT).")
+add_library(mongo MODULE "")
 
-set(ver 5.1)
-if(USE_LUA_VERSION MATCHES "^[0-9]\\.[0-9]$")
-	set(ver ${USE_LUA_VERSION})
-	string(REGEX REPLACE "\\." "" ver_ ${USE_LUA_VERSION})
-	set(lua lua-${ver} lua${ver} lua${ver_})
-elseif(USE_LUA_VERSION STREQUAL "jit")
-	set(lua luajit)
-elseif(USE_LUA_VERSION STREQUAL "")
-	set(lua lua)
-else()
-	message(FATAL_ERROR "Unrecognized Lua version '${USE_LUA_VERSION}'")
-endif()
-
-find_package(mongoc-1.0 1.16 REQUIRED)
-find_package(PkgConfig)
-pkg_search_module(LUA REQUIRED ${lua})
-
-if(NOT LUA_FOUND)
-	message(FATAL_ERROR "Lua not found - set USE_LUA_VERSION to match your configuration")
-elseif(USE_LUA_VERSION STREQUAL "")
-	string(REGEX MATCH "^[0-9]\\.[0-9]" USE_LUA_VERSION ${LUA_VERSION})
-	message(STATUS "Using Lua '${USE_LUA_VERSION}', version ${LUA_VERSION} (set USE_LUA_VERSION to override)")
-	set(ver ${USE_LUA_VERSION})
-else()
-	message(STATUS "Using Lua '${USE_LUA_VERSION}', version ${LUA_VERSION}")
-endif()
-
-add_definitions(-Wall -Wextra -Wpedantic -Wundef -Wshadow -Wredundant-decls -Wstrict-prototypes -Wmissing-prototypes
-	-Wno-variadic-macros -Wno-unused-result -Wno-unused-parameter)
-
-include_directories(${MONGOC_INCLUDE_DIRS} ${LUA_INCLUDE_DIRS})
-link_directories(${MONGOC_LIBRARY_DIRS})
-
-file(GLOB srcs src/*.c)
-add_library(mongo SHARED ${srcs})
-target_link_libraries(mongo PRIVATE mongo::mongoc_shared)
+# environment
+set_target_properties(mongo PROPERTIES C_STANDARD 99 C_STANDARD_REQUIRED ON)
 set_target_properties(mongo PROPERTIES PREFIX "")
-if(APPLE)
-	target_link_libraries(mongo "-undefined dynamic_lookup")
-	set_target_properties(mongo PROPERTIES SUFFIX ".so")
-endif()
 
-include(GNUInstallDirs)
-install(TARGETS mongo DESTINATION ${CMAKE_INSTALL_LIBDIR}/lua/${ver})
+# source codes
+file(GLOB PROJ_INC src/*.h)
+file(GLOB PROJ_SRC src/*.c)
 
-enable_testing()
-find_program(LUA_COMMAND NAMES ${lua})
-file(GLOB tests test/test-*.lua)
-foreach(test ${tests})
-	string(REGEX REPLACE "^.*(test-[^/\\]+\\.lua)$" "\\1" name ${test})
-	add_test(${name} ${LUA_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}/test/test.lua ${test})
-	set_tests_properties(${name} PROPERTIES ENVIRONMENT "LUA_CPATH=${CMAKE_BINARY_DIR}/?.so\;\;")
-endforeach()
+# third party
+find_package(libmongoc-1.0 1.17 REQUIRED)
+find_package(Lua REQUIRED)
+
+# generate lib
+target_include_directories(mongo PRIVATE ${MONGOC_INCLUDE_DIRS} ${LUA_INCLUDE_DIR})
+target_sources(mongo PRIVATE ${PROJ_INC} ${PROJ_SRC})
+target_link_libraries(mongo ${MONGOC_LIBRARIES} ${LUA_LIBRARIES})
+
+# install lib
+install(TARGETS mongo DESTINATION "${CMAKE_INSTALL_PREFIX}/lib")
