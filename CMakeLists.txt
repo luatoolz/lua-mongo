@@ -15,13 +15,13 @@ file(GLOB PROJ_INC src/*.h)
 file(GLOB PROJ_SRC src/*.c)
 
 # third party
-find_package(libmongoc-1.0 1.17 REQUIRED)
+find_package(mongoc-1.0 1.17 REQUIRED)
 find_package(Lua REQUIRED)
 
 # generate lib
-target_include_directories(mongo PRIVATE ${MONGOC_INCLUDE_DIRS} ${LUA_INCLUDE_DIR})
+target_include_directories(mongo PRIVATE ${LUA_INCLUDE_DIR})
 target_sources(mongo PRIVATE ${PROJ_INC} ${PROJ_SRC})
-target_link_libraries(mongo ${MONGOC_LIBRARIES} ${LUA_LIBRARIES})
+target_link_libraries(mongo mongo::mongoc_shared ${LUA_LIBRARIES})
 
 # install lib
 install(TARGETS mongo DESTINATION "${CMAKE_INSTALL_PREFIX}/lib")
