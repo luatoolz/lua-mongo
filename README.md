@@ -1,3 +1,16 @@
+```lua
+-- !ATTENTION PLEASE!
+--[[
+Fork for: lua 5.1 + alpine + mongo
+
+Content is same as https://github.com/chensoft/lua-mongo
+
+The difference is only in rockspec:
+- 5.1
+- name lua-mongo (as original) to fix compatibility issue
+--]]
+```
+
 MongoDB Driver for Lua
 ======================
 
