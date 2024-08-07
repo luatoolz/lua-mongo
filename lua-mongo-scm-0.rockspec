@@ -1,8 +1,7 @@
 package = "lua-mongo"
-version = "1.2.3-1"
+version = "scm-0"
 source = {
-   url = "git://github.com/luatoolz/lua-mongo",
-   tag = "v1.2.3"
+   url = "git+https://github.com/luatoolz/lua-mongo",
 }
 description = {
    summary = "Lua bindings for mongo, forked from neoxic/lua-mongo",
