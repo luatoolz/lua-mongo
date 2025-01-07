@@ -15,7 +15,6 @@ dependencies = {
 build = {
    type = "cmake",
    variables = {
-     USE_LUA_VERSION = "$(LUA_VERSION)",
      CMAKE_BUILD_TYPE = "Release",
      CMAKE_INSTALL_PREFIX = "$(PREFIX)"
    },
