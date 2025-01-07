@@ -4,12 +4,6 @@
 cmake_minimum_required(VERSION 3.1)
 project(mongo LANGUAGES C)
 
-if(NOT DEFINED USE_LUA_VERSION)
-if(NOT ("$ENV{LUA_VERSION}" STREQUAL ""))
-set(USE_LUA_VERSION "$ENV{LUA_VERSION}")
-endif()
-endif()
-
 add_library(mongo MODULE "")
 
 # environment
